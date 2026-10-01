@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ytget Downloader</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Top Header -->
+    <header class="header">
+      <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" fill="#dc2626" stroke="#dc2626"/>
+          <path d="M12 7v7m0 0l-3-3m3 3l3-3m-6 6h6" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="brand-title">ytget</span>
+      </div>
+      <div class="header-right">
+        <div id="serverStatus" class="status-badge checking">
+          <span class="status-dot"></span>
+          <span class="status-text">Checking...</span>
+        </div>
+        <button id="serverToggleBtn" class="btn-server-toggle" title="Click to start or stop ytget server">
+          <span id="serverToggleIcon">▶</span>
+          <span id="serverToggleText">Start</span>
+        </button>
+        <button id="settingsToggleBtn" class="btn-icon-header" title="Open Settings">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ========================================================= -->
+    <!-- VIEW 1: Main Downloader View                              -->
+    <!-- ========================================================= -->
+    <main id="mainView" class="view-panel">
+      <!-- Offline Alert Banner -->
+      <div id="serverAlert" class="alert alert-offline hidden">
+        <div class="alert-content">
+          <div class="alert-title">Companion Server Offline</div>
+          <div class="alert-body">Click below to start it with one click:</div>
+        </div>
+        <button id="quickStartBtn" class="btn-sm btn-start-accent" title="Start companion server">▶ Start Server</button>
+      </div>
+
+      <!-- Media Target Card -->
+      <section class="card media-card">
+        <div class="card-header">
+          <span class="section-label">Target Media</span>
+          <span id="mediaTypeBadge" class="badge badge-neutral">Auto-Detect</span>
+        </div>
+        <div class="url-input-group">
+          <input
+            type="text"
+            id="urlInput"
+            placeholder="Paste YouTube video or playlist URL..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="pasteBtn" class="icon-btn" title="Paste from clipboard">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+          </button>
+        </div>
+        <div id="playlistSwitchGroup" class="playlist-switch-group hidden">
+          <button type="button" id="btnTargetPlaylist" class="btn-target-switch active" title="Download entire playlist">
+            <span>📑 Entire Playlist</span>
+          </button>
+          <button type="button" id="btnTargetVideo" class="btn-target-switch btn-single" title="Download only this single video">
+            <span>🎬 This Video Only</span>
+          </button>
+        </div>
+        <div id="mediaPreview" class="media-preview hidden">
+          <span id="mediaTitle" class="media-title">Loading title...</span>
+        </div>
+      </section>
+
+      <!-- Download Settings Card -->
+      <section class="card settings-card">
+        <div class="form-row">
+          <label for="qualitySelect" class="form-label">Quality & Format</label>
+          <div class="select-wrapper">
+            <select id="qualitySelect">
+              <option value="best" selected>⚡ Best Video Available</option>
+              <option value="1080">🎬 1080p Full HD</option>
+              <option value="720">📺 720p HD</option>
+              <option value="480">📱 480p SD</option>
+              <option value="360">💾 360p Low</option>
+              <option value="audio">🎵 Audio Only (MP3 + Cover Art + Tags)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="options-grid">
+          <label class="checkbox-label" title="Skip videos that already have finished files">
+            <input type="checkbox" id="skipExistingCheck" checked />
+            <span class="custom-checkbox"></span>
+            <span>Skip existing files</span>
+          </label>
+          <label class="checkbox-label" title="Embed YouTube thumbnail artwork and tags into MP4/MP3">
+            <input type="checkbox" id="embedThumbnailCheck" checked />
+            <span class="custom-checkbox"></span>
+            <span>Embed cover art & tags</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Action Button -->
+      <button id="downloadBtn" class="btn btn-primary">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Download with ytget</span>
+      </button>
+
+      <!-- Live Active Downloads Container (supports multiple concurrent downloads) -->
+      <div id="progressCardsContainer" class="progress-cards-container"></div>
+
+      <!-- Recent Downloads Card -->
+      <section class="card history-card">
+        <div class="history-header">
+          <span class="section-label">Recent Downloads</span>
+          <span id="activeDownloadDirLabel" class="history-sublabel">downloads/</span>
+        </div>
+        <div id="historyList" class="history-list">
+          <div class="empty-state">No recent downloads yet</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ========================================================= -->
+    <!-- VIEW 2: Settings View                                     -->
+    <!-- ========================================================= -->
+    <section id="settingsView" class="view-panel hidden">
+      <div class="settings-top-bar">
+        <button id="backFromSettingsBtn" class="btn-back">
+          ‹ Back
+        </button>
+        <span class="settings-title">Extension Settings</span>
+      </div>
+
+      <!-- Setting 1: Pane Location / Display Mode -->
+      <div class="card setting-block">
+        <div class="setting-title-row">
+          <span class="setting-title">Display Mode (Pane Location)</span>
+        </div>
+        <p class="setting-desc">Choose where ytget opens when you click the extension icon:</p>
+
+        <div class="segmented-control">
+          <button type="button" id="modePopupBtn" class="seg-btn active" data-mode="popup">
+            🗗 Popup Window
+          </button>
+          <button type="button" id="modeSidebarBtn" class="seg-btn" data-mode="sidepanel">
+            ◨ Side Panel (Docked)
+          </button>
+        </div>
+
+        <button type="button" id="openSidePanelNowBtn" class="btn-subtle">
+          ◨ Open in Chrome Side Panel Now
+        </button>
+      </div>
+
+      <!-- Setting 2: Download Location -->
+      <div class="card setting-block">
+        <div class="setting-title-row">
+          <span class="setting-title">Download Location</span>
+        </div>
+        <p class="setting-desc">Folder where videos and MP3s will be saved:</p>
+
+        <input
+          type="text"
+          id="settingDownloadDir"
+          class="setting-input"
+          placeholder="/home/ea/project/tools/yt-playlist-dl/downloads"
+          spellcheck="false"
+        />
+
+        <div class="presets-row">
+          <button type="button" class="preset-chip" data-dir="default">Project folder</button>
+          <button type="button" class="preset-chip" data-dir="~/Downloads">~/Downloads</button>
+          <button type="button" class="preset-chip" data-dir="~/Videos">~/Videos</button>
+          <button type="button" class="preset-chip" data-dir="~/Music">~/Music</button>
+        </div>
+      </div>
+
+      <!-- Setting 3: Default Quality -->
+      <div class="card setting-block">
+        <div class="setting-title-row">
+          <span class="setting-title">Default Quality</span>
+        </div>
+        <p class="setting-desc">Default resolution pre-selected for new downloads:</p>
+
+        <div class="select-wrapper">
+          <select id="settingDefaultQuality">
+            <option value="best">⚡ Best Video Available</option>
+            <option value="1080">🎬 1080p Full HD</option>
+            <option value="720">📺 720p HD</option>
+            <option value="480">📱 480p SD</option>
+            <option value="360">💾 360p Low</option>
+            <option value="audio">🎵 Audio Only (MP3)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Setting 4: Toggles -->
+      <div class="card setting-block">
+        <div class="setting-title-row">
+          <span class="setting-title">Behavior & Appearance</span>
+        </div>
+        <div class="options-grid">
+          <label class="checkbox-label" title="Automatically start the companion server when opening popup if offline">
+            <input type="checkbox" id="settingAutoStart" />
+            <span class="custom-checkbox"></span>
+            <span>Auto-start server when opening extension</span>
+          </label>
+          <label class="checkbox-label" title="Show [⬇ ytget] button below YouTube videos">
+            <input type="checkbox" id="settingShowInPageBtn" checked />
+            <span class="custom-checkbox"></span>
+            <span>Show [⬇ ytget] download button on YouTube</span>
+          </label>
+          <label class="checkbox-label" title="Show notifications when a download finishes">
+            <input type="checkbox" id="settingNotifyComplete" checked />
+            <span class="custom-checkbox"></span>
+            <span>Notify when download completes</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Setting 5: Max Concurrent Downloads -->
+      <div class="card setting-block">
+        <div class="setting-title-row">
+          <span class="setting-title">Max Concurrent Downloads</span>
+        </div>
+        <p class="setting-desc">Number of videos downloading simultaneously in parallel (default: 10):</p>
+        <input
+          type="number"
+          id="settingMaxConcurrent"
+          class="setting-input"
+          value="10"
+          min="1"
+          max="50"
+        />
+      </div>
+
+      <!-- Setting 6: Server Port -->
+      <div class="card setting-block">
+        <div class="setting-title-row">
+          <span class="setting-title">Companion Server Port</span>
+        </div>
+        <p class="setting-desc">Local port for ytget_server.py (default: 8765):</p>
+        <input
+          type="number"
+          id="settingServerPort"
+          class="setting-input"
+          value="8765"
+          min="1024"
+          max="65535"
+        />
+      </div>
+
+      <!-- Settings Actions -->
+      <div class="settings-actions">
+        <button type="button" id="saveSettingsBtn" class="btn btn-primary">Save Settings</button>
+        <button type="button" id="resetSettingsBtn" class="btn-text">Reset Defaults</button>
+      </div>
+    </section>
+
+    <!-- Floating Toast Message -->
+    <div id="toastMessage" class="toast hidden"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span id="footerPortLabel">ytget v1.0 • Port: <strong>8765</strong></span>
+      <button id="refreshBtn" class="footer-link" title="Refresh status">Refresh</button>
+    </footer>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

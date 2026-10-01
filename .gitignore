@@ -1,0 +1,35 @@
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Downloaded files & folders
+downloads/
+*.mp4
+*.mkv
+*.webm
+*.mp3
+*.m4a
+*.part
+*.ytdl
+*.temp
+
+# Private browser cookies / credentials
+cookies.txt
+*.cookie
+*.cookies
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+*.pid
