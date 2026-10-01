@@ -129,7 +129,7 @@ Open **PowerShell** or **Command Prompt** (cmd) and follow these steps:
 
 ```cmd
 # 1. Clone your repository
-git clone https://github.com/<your-username>/yt-playlist-dl.git
+https://github.com/eyasuasegid/ytget-chrome-extention.git
 cd yt-playlist-dl
 
 # 2. Create and activate a Python virtual environment
@@ -154,7 +154,7 @@ Open your terminal and run:
 
 ```bash
 # 1. Clone your repository
-git clone https://github.com/<your-username>/yt-playlist-dl.git
+https://github.com/eyasuasegid/ytget-chrome-extention.git
 cd yt-playlist-dl
 
 # 2. Create and activate a Python virtual environment
